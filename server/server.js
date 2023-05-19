@@ -31,6 +31,7 @@ app.get("/", (req, res) => {
 // app.get defnines a route handler (the route handler is the callback arrow function) for the HTTP GET method and specifies the path which is /getItems
 // route for getting all items
 app.get("/api/v1/items", async (req, res) => {
+    // we use a try catch because we are querying the database
     try {
         const results = await db.query("SELECT * FROM items");
         console.log(results);
@@ -45,21 +46,38 @@ app.get("/api/v1/items", async (req, res) => {
 });
 
 // get a specific item
-app.get("/api/v1/items/:id", (req, res) => {
-    console.log(req.params);
-    res.status(200).json({
-        data: {
-            item: "Hat"
-        }
-    })
+app.get("/api/v1/items/:id", async (req, res) => {
+    console.log(req.params.id);
+   // DON'T use template strings for querying (leads to SQL-injections) const result = await db.query(`SELECT * FROM items WHERE id = ${req.params.id}`) == BAD
+   try {
+       var id = req.params.id;
+       const result = await db.query("SELECT * FROM items WHERE id = $1", [id]);    // $1 is the first element of the array passed as the 2nd arg to db.query
+       // response to client 
+       res.status(200).json({
+           data: {
+               item: result.rows[0]
+           }
+       })
+
+   } catch(e) {
+    console.log(e);
+   }
 });
 
 // create an item
-app.post("/api/v1/items", (req, res) => {
-    console.log(req.body);
-    res.status(201).json({
-        status: "Created"
-    })
+app.post("/api/v1/items", async (req, res) => {
+    
+    try {
+        const results = await db.query("INSERT INTO items (name, price, category, description) values ($1, $2, $3, $4) RETURNING *", 
+        [req.body.name, req.body.price, req.body.category, req.body.description]);
+        console.log(results);
+        res.status(201).json({
+            data: results.rows
+        })
+        console.log(results);
+    } catch(e) {
+            console.log(e);
+    }
 });
 
 // update an item
