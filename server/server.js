@@ -15,7 +15,7 @@ app.listen(port, () =>  {
 // is directed to, when it is finished it passes the execution on to the next middleware, 
 // which is the route handler. Express reads file from top to bottom, so the position of middleware
 // in the file is very important.
-// here we use ,morgan as the middleware for logging different things. Miorgan can be used with your own middleware funcitons as well 
+// here we use morgan as the middleware for logging different things. Miorgan can be used with your own middleware funcitons as well 
 app.use(morgan("dev"));
 
 // this middleware makes it possible for us to use the body of the request object that is sent form the client
@@ -80,14 +80,43 @@ app.post("/api/v1/items", async (req, res) => {
     }
 });
 
-// update an item
-app.put("/api/v1/items/:id", (req, res) => {
-    console.log(req.params.id);
-    console.log(req.body);
+// update an entire item
+app.put("/api/v1/items/:id", async (req, res) => {
+    try {
+        const result = await db.query(
+            "UPDATE items SET name = $1, price = $2, category = $3, description = $4 WHERE id = $5 RETURNING *", 
+            [req.body.name, req.body.price, req.body.category, req.body.description, req.params.id]);
+        res.status(200).json({
+            data: result.rows
+        });
+    } catch(e) {
+        console.log(e);
+    }
+
+
 });
 
+//update part of an item
+app.patch("/api/v1/items/:id", async (req, res) => {
+    try {
+        
+    } catch(e) {
+        console.log(e);
+    }
+});
+
+
+
 // Delete an item
-app.delete("/api/v1/items/:id", (req, res) => {
+app.delete("/api/v1/items/:id", async (req, res) => {
+
+    try {
+        const result = await db.query(
+            "DELETE FROM items where id = $1", 
+            [req.params.id]); 
+    } catch(e) {
+        console.log(e);
+    } 
     res.status(202).json({
         status: "Deleted"
     });
