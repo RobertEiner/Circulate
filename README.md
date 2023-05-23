@@ -2,7 +2,7 @@
 
 Circulate is a concept for a website where people can buy and sell second hand items.
 
-## why?
+## Why?
 In today's world we are consuming more than we can afford, using natural resources like never before. A circular mindset, where, instead of buying new things, the focus is on finding a new use for the things that we no longer need.
 
 ## How?
